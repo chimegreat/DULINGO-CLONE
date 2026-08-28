@@ -9,8 +9,8 @@ import {
   Pressable,
   Platform,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
-import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import { colors } from "@/constants/theme";
@@ -21,23 +21,42 @@ type VerificationModalProps = {
   visible: boolean;
   email: string;
   onClose: () => void;
+  onVerify: (code: string) => Promise<string | void>;
+  onResend?: () => void;
 };
 
-export function VerificationModal({ visible, email, onClose }: VerificationModalProps) {
+export function VerificationModal({ visible, email, onClose, onVerify, onResend }: VerificationModalProps) {
   const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
-  const handleChangeCode = (value: string) => {
+  const handleChangeCode = async (value: string) => {
     const digitsOnly = value.replace(/[^0-9]/g, "").slice(0, CODE_LENGTH);
     setCode(digitsOnly);
+    setError(null);
 
     if (digitsOnly.length === CODE_LENGTH) {
-      router.replace("/");
+      setIsVerifying(true);
+      const verifyError = await onVerify(digitsOnly);
+      setIsVerifying(false);
+
+      if (verifyError) {
+        setError(verifyError);
+        setCode("");
+      }
     }
+  };
+
+  const handleResend = () => {
+    setCode("");
+    setError(null);
+    onResend?.();
   };
 
   const handleClose = () => {
     setCode("");
+    setError(null);
     onClose();
   };
 
@@ -64,7 +83,10 @@ export function VerificationModal({ visible, email, onClose }: VerificationModal
             <Text className="font-poppins-medium text-text-primary">{email}</Text>
           </Text>
 
-          <Pressable className="flex-row justify-between mt-6" onPress={() => inputRef.current?.focus()}>
+          <Pressable
+            className="flex-row justify-between mt-6"
+            onPress={() => inputRef.current?.focus()}
+          >
             {Array.from({ length: CODE_LENGTH }).map((_, index) => {
               const digit = code[index];
               const isActive = index === code.length;
@@ -73,7 +95,7 @@ export function VerificationModal({ visible, email, onClose }: VerificationModal
                 <View
                   key={index}
                   className={`w-12 h-14 rounded-2xl border items-center justify-center ${
-                    isActive ? "border-lingua-deep-purple" : "border-border"
+                    error ? "border-error" : isActive ? "border-lingua-deep-purple" : "border-border"
                   }`}
                 >
                   <Text className="text-h2 font-poppins-semibold text-text-primary">{digit ?? ""}</Text>
@@ -82,6 +104,23 @@ export function VerificationModal({ visible, email, onClose }: VerificationModal
             })}
           </Pressable>
 
+          {isVerifying && (
+            <View className="flex-row items-center justify-center mt-4">
+              <ActivityIndicator color={colors.linguaDeepPurple} />
+            </View>
+          )}
+
+          {error && (
+            <Text className="text-body-sm text-error mt-4 text-center">{error}</Text>
+          )}
+
+          <TouchableOpacity onPress={handleResend} disabled={isVerifying} className="mt-6 self-center">
+            <Text className="text-body-md text-text-secondary">
+              Didn&apos;t get a code?{" "}
+              <Text className="font-poppins-semibold text-lingua-deep-purple">Resend</Text>
+            </Text>
+          </TouchableOpacity>
+
           <TextInput
             ref={inputRef}
             value={code}
@@ -89,6 +128,7 @@ export function VerificationModal({ visible, email, onClose }: VerificationModal
             keyboardType="number-pad"
             maxLength={CODE_LENGTH}
             autoFocus
+            editable={!isVerifying}
             style={styles.hiddenInput}
           />
         </View>
