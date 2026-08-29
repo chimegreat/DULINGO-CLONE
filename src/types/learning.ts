@@ -5,6 +5,7 @@ export interface Language {
   name: string;
   nativeName: string;
   flagEmoji: string;
+  greeting: string;
 }
 
 export interface Unit {

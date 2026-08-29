@@ -15,3 +15,9 @@ export const images = {
   streakFire,
   treasure,
 };
+
+// No local asset exists yet for the AI tutor avatar — using an Unsplash placeholder.
+export const remoteImages = {
+  aiTutorAvatar:
+    "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=150&h=150&fit=crop&crop=faces",
+};

@@ -4,8 +4,11 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
+import { PostHogProvider } from "posthog-react-native";
 
 import { fontFamily } from "@/constants/theme";
+import { useLanguageStore } from "@/store/language-store";
+import { posthogApiKey, posthogHost } from "@/lib/posthog";
 
 import "../global.css";
 
@@ -31,13 +34,23 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
+  useEffect(() => {
+    useLanguageStore.persist.rehydrate();
+  }, []);
+
   if (!fontsLoaded && !fontError) {
     return null;
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <Stack />
-    </ClerkProvider>
+    <PostHogProvider
+      apiKey={posthogApiKey}
+      options={{ host: posthogHost }}
+      autocapture
+    >
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <Stack />
+      </ClerkProvider>
+    </PostHogProvider>
   );
 }

@@ -22,6 +22,9 @@ export const neutralColors = {
   border: "#E5E7EB",
   surface: "#F6F7FB",
   background: "#FFFFFF",
+  surfaceWarm: "#FCEEE0",
+  surfaceWarmTrack: "#F3DFC4",
+  surfaceMint: "#EFF5E5",
 } as const;
 
 export const colors = {

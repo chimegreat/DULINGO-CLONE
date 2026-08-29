@@ -24,6 +24,9 @@
   --color-border: #e5e7eb;
   --color-surface: #f6f7fb;
   --color-background: #ffffff;
+  --color-surface-warm: #fceee0;
+  --color-surface-warm-track: #f3dfc4;
+  --color-surface-mint: #eff5e5;
 
   /* Font families — loaded via expo-font in src/app/_layout.tsx */
   --font-sans: "Poppins-Regular";
